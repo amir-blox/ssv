@@ -9,6 +9,7 @@ import (
 	"github.com/bloxapp/ssv/utils/commons"
 	"github.com/bloxapp/ssv/utils/rsaencryption"
 	"github.com/prysmaticlabs/prysm/async"
+	"github.com/prysmaticlabs/prysm/async/event"
 	"sync"
 	"time"
 
@@ -68,6 +69,12 @@ type p2pNetwork struct {
 	operatorPrivKey *rsa.PrivateKey
 	fork            forks.Fork
 
+	// feeds to propagate messages to listeners
+	ibftMsgFeed *event.Feed
+	sigMsgFeed *event.Feed
+	decidedMsgFeed *event.Feed
+	syncMsgFeed *event.Feed
+
 	psSubs       map[string]context.CancelFunc
 	psTopicsLock *sync.RWMutex
 
@@ -87,6 +94,12 @@ func New(ctx context.Context, logger *zap.Logger, cfg *Config) (network.Network,
 		listenersLock:   &sync.Mutex{},
 		logger:          logger,
 		operatorPrivKey: cfg.OperatorPrivateKey,
+
+		ibftMsgFeed: new(event.Feed),
+		sigMsgFeed: new(event.Feed),
+		decidedMsgFeed: new(event.Feed),
+		syncMsgFeed: new(event.Feed),
+
 		psSubs:          make(map[string]context.CancelFunc),
 		psTopicsLock:    &sync.RWMutex{},
 		reportLastMsg:   cfg.ReportLastMsg,
@@ -243,4 +256,11 @@ func (n *p2pNetwork) trace(msg string, fields ...zap.Field) {
 	if n.cfg.NetworkTrace {
 		n.logger.Debug(msg, fields...)
 	}
+}
+
+// SubscribeSignedMessageFeed subscribes on a *proto.SignedMessage feed
+func SubscribeSignedMessageFeed(feed *event.Feed) (<-chan *proto.SignedMessage, event.Subscription) {
+	cn := make(chan *proto.SignedMessage, MsgChanSize)
+	sub := feed.Subscribe(cn)
+	return cn, sub
 }

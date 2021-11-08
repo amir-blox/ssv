@@ -4,6 +4,7 @@ import (
 	"github.com/bloxapp/ssv/ibft/proto"
 	"github.com/bloxapp/ssv/network"
 	"github.com/pkg/errors"
+	"github.com/prysmaticlabs/prysm/async/event"
 	"go.uber.org/zap"
 )
 
@@ -36,4 +37,9 @@ func (n *p2pNetwork) ReceivedSignatureChan() <-chan *proto.SignedMessage {
 	n.listenersLock.Unlock()
 
 	return ls.sigCh
+}
+
+// ReceivedSignatureMsg returns the channel for signature messages
+func (n *p2pNetwork) ReceivedSignatureMsg() (<-chan *proto.SignedMessage, event.Subscription) {
+	return SubscribeSignedMessageFeed(n.sigMsgFeed)
 }

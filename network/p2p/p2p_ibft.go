@@ -4,6 +4,7 @@ import (
 	"github.com/bloxapp/ssv/ibft/proto"
 	"github.com/bloxapp/ssv/network"
 	"github.com/pkg/errors"
+	"github.com/prysmaticlabs/prysm/async/event"
 	"go.uber.org/zap"
 )
 
@@ -39,4 +40,9 @@ func (n *p2pNetwork) ReceivedMsgChan() <-chan *proto.SignedMessage {
 	n.listenersLock.Unlock()
 
 	return ls.msgCh
+}
+
+// ReceivedIBFTMsg returns the channel for ibft messages
+func (n *p2pNetwork) ReceivedIBFTMsg() (<-chan *proto.SignedMessage, event.Subscription) {
+	return SubscribeSignedMessageFeed(n.ibftMsgFeed)
 }

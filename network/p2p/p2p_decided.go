@@ -4,6 +4,7 @@ import (
 	"github.com/bloxapp/ssv/ibft/proto"
 	"github.com/bloxapp/ssv/network"
 	"github.com/pkg/errors"
+	"github.com/prysmaticlabs/prysm/async/event"
 	"go.uber.org/zap"
 )
 
@@ -47,4 +48,9 @@ func (n *p2pNetwork) ReceivedDecidedChan() <-chan *proto.SignedMessage {
 	n.listenersLock.Unlock()
 
 	return ls.decidedCh
+}
+
+// ReceivedDecidedMsg returns the channel for decided messages
+func (n *p2pNetwork) ReceivedDecidedMsg() (<-chan *proto.SignedMessage, event.Subscription) {
+	return SubscribeSignedMessageFeed(n.decidedMsgFeed)
 }

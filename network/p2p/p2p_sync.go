@@ -1,10 +1,12 @@
 package p2p
 
 import (
+	"github.com/bloxapp/ssv/ibft/proto"
 	"github.com/bloxapp/ssv/network"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/protocol"
 	"github.com/pkg/errors"
+	"github.com/prysmaticlabs/prysm/async/event"
 	"go.uber.org/zap"
 )
 
@@ -157,4 +159,9 @@ func (n *p2pNetwork) ReceivedSyncMsgChan() <-chan *network.SyncChanObj {
 	n.listenersLock.Unlock()
 
 	return ls.syncCh
+}
+
+// ReceivedSyncMsg returns the channel for signature messages
+func (n *p2pNetwork) ReceivedSyncMsg() (<-chan *proto.SignedMessage, event.Subscription) {
+	return SubscribeSignedMessageFeed(n.sigMsgFeed)
 }
